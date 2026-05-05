@@ -1,0 +1,55 @@
+﻿<Window x:Class="turret_game.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:helix="http://helix-toolkit.org/wpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="1000">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Margin="8">
+            <Button x:Name="BtnLoad" Content="Charger OBJ..." Margin="0,0,0,8" />
+            <TextBlock Text="Objets de la scene" FontWeight="Bold"/>
+            <ListBox ItemsSource="{Binding SceneObjects}" SelectedItem="{Binding SelectedObject}"
+                     DisplayMemberPath="Name" Height="100" Margin="0,4,0,8"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <Button x:Name="BtnSetParent" Content="Def parent" Margin="0,0,8,0"/>
+                <Button x:Name="BtnSetChild" Content="Def enfant" Margin="0,0,8,0"/>
+                <Button x:Name="BtnLink" Content="Lier parent→enfant" />
+            </StackPanel>
+
+            <TextBlock Text="Parent: " FontWeight="Bold" />
+            <TextBlock Text="{Binding SelectedParent.Name, TargetNullValue=(aucun)}" Margin="0,0,0,4"/>
+            <TextBlock Text="Enfant: " FontWeight="Bold" />
+            <TextBlock Text="{Binding SelectedChild.Name, TargetNullValue=(aucun)}" Margin="0,0,0,8"/>
+
+            <TextBlock Text="Transform selectionne (TX,TY,TZ en unites; RX,RY,RZ en degres)" TextWrapping="Wrap"/>
+            <StackPanel DataContext="{Binding SelectedObject}" Margin="0,8,0,0">
+                <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="TX"/><TextBox Width="80" Text="{Binding TX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="TY"/><TextBox Width="80" Text="{Binding TY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="TZ"/><TextBox Width="80" Text="{Binding TZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="RX"/><TextBox Width="80" Text="{Binding RX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="RY"/><TextBox Width="80" Text="{Binding RY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="RZ"/><TextBox Width="80" Text="{Binding RZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+
+                <!-- Sliders pour déplacer l'objet sélectionné -->
+                <TextBlock Text="Déplacer (slider) - RX" Margin="0,8,0,2"/>
+                <Slider Minimum="-200" Maximum="200" Value="{Binding RX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Déplacer (slider) - RY" Margin="0,8,0,2"/>
+                <Slider Minimum="-200" Maximum="200" Value="{Binding RY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Déplacer (slider) - RZ" Margin="0,8,0,2"/>
+                <Slider Minimum="-200" Maximum="200" Value="{Binding RZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </StackPanel>
+
+        <helix:HelixViewport3D x:Name="Viewport" Grid.Column="1" Background="LightGray" ShowCoordinateSystem="True" ZoomExtentsWhenLoaded="True">
+            <helix:DefaultLights/>
+        </helix:HelixViewport3D>
+    </Grid>
+</Window>
