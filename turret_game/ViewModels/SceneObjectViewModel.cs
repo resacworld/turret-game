@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Media3D;
@@ -36,24 +35,31 @@ namespace turret_game.ViewModels
 
         private void ParentListener(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(GetTransform) || e.PropertyName == nameof(TX) || e.PropertyName == nameof(TY) || e.PropertyName == nameof(TZ) || e.PropertyName == nameof(RX) || e.PropertyName == nameof(RY) || e.PropertyName == nameof(RZ))
-            {
-                NotifyTransformChanged();
-            }
+            // Quand le parent change de pose, invalide la transform du child
+            NotifyTransformChanged();
         }
 
         public void LinkToParent(SceneObjectViewModel parent)
         {
+            // detach existing parent listener si nécessaire
+            if (Parent != null)
+                Parent.PropertyChanged -= ParentListener;
+
             Parent = parent;
 
-            Parent.PropertyChanged += ParentListener;
+            if (Parent != null)
+                Parent.PropertyChanged += ParentListener;
+
+            NotifyTransformChanged();
         }
 
         public void Unlink()
         {
-            Parent.PropertyChanged -= ParentListener;
+            if (Parent != null)
+                Parent.PropertyChanged -= ParentListener;
 
             Parent = null;
+            NotifyTransformChanged();
         }
 
         // Calcule la transform appliquée à ce modèle (parent puis offset puis local)
@@ -67,7 +73,7 @@ namespace turret_game.ViewModels
             localGroup.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), RX)));
             localGroup.Children.Add(new TranslateTransform3D(TX, TY, TZ));
 
-            //// Offset transform (applied relative to parent)
+            // Offset transform (applied relative to parent)
             var offsetGroup = new Transform3DGroup();
             offsetGroup.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), OffRZ)));
             offsetGroup.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), OffRY)));
@@ -75,16 +81,20 @@ namespace turret_game.ViewModels
             offsetGroup.Children.Add(new TranslateTransform3D(OffTX, OffTY, OffTZ));
 
             var result = new Transform3DGroup();
+
             if (Parent != null)
             {
-                result.Children.Add(Parent.GetTransform());
-                result.Children.Add(offsetGroup);
+                // IMPORTANT: add local then offset then parent so que l'application réelle soit
+                // parent * offset * local  (local appliqué en premier, parent en dernier)
                 result.Children.Add(localGroup);
+                result.Children.Add(offsetGroup);
+                result.Children.Add(Parent.GetTransform());
             }
             else
             {
-                result.Children.Add(offsetGroup);
+                // sans parent: offset * local => local appliqué en premier
                 result.Children.Add(localGroup);
+                result.Children.Add(offsetGroup);
             }
 
             return result;
