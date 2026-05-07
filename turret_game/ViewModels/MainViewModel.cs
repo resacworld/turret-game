@@ -1,3 +1,4 @@
+using HelixToolkit.Maths;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -46,7 +47,7 @@ namespace turret_game.ViewModels
         public MainViewModel()
         {
             // timer pour update simple (UI thread)
-            _gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(5) };
             _gameTimer.Tick += (s, e) => GameTick(_gameTimer.Interval.TotalSeconds);
         }
 
@@ -60,9 +61,6 @@ namespace turret_game.ViewModels
             Cannon.TY = 0;
             Cannon.TZ = 1.0;
 
-            // créer ennemis autour du centre qui s'orientent vers le centre
-            SpawnEnemiesAroundCenter(count: 8, radius: 80.0, elevation: 2.0);
-
             _gameTimer.Start();
         }
 
@@ -74,12 +72,12 @@ namespace turret_game.ViewModels
                 double angle = 2.0 * Math.PI * i / count + (_rnd.NextDouble() * 0.15 - 0.075);
                 double x = Math.Cos(angle) * radius;
                 double y = Math.Sin(angle) * radius;
-                var start = new Point3D(x, y, elevation);
+                var start = new Point3D(x, y, elevation + _rnd.NextFloat(-85, 85));
 
                 // cible : centre de la map (0,0, hauteur du canon)
                 var target = new Point3D(0, 0, Cannon.TZ);
 
-                var enemy = new Enemy(start, target, speed: 4.0 + _rnd.NextDouble() * 2.0, health: 100.0);
+                var enemy = new Enemy(start, target, speed: 15.0 + _rnd.NextDouble() * 15.0, health: 100.0);
                 _enemies.Add(enemy);
                 AddObjectToScene(enemy.Body);
 
@@ -111,6 +109,11 @@ namespace turret_game.ViewModels
                 _enemies.Remove(d);
                 if (SceneObjects.Contains(d.Body))
                     SceneObjects.Remove(d.Body);
+            }
+
+            if(_enemies.Count <= 2)
+            {
+                SpawnEnemiesAroundCenter(count: 12, radius: 80.0, elevation: 2.0);
             }
         }
 

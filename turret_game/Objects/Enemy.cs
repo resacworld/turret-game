@@ -9,12 +9,12 @@ namespace turret_game.Objects
         public SceneObjectViewModel Body { get; }
 
         public double Health { get; private set; } = 100.0;
-        public double Speed { get; set; } = 6.0; // units per second
+        public double Speed { get; set; } = 30.0; // units per second
         public bool IsDead => Health <= 0.0;
 
         private Point3D _target;
 
-        public Enemy(Point3D start, Point3D target, double speed = 6.0, double health = 100.0)
+        public Enemy(Point3D start, Point3D target, double speed = 30.0, double health = 100.0)
         {
             Body = new SceneObjectViewModel
             {
