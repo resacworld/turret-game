@@ -1,5 +1,5 @@
-﻿using turret_game.Services;
-using turret_game.Objects;
+﻿using turret_game.Objects;
+using turret_game.Services;
 
 namespace turret_game.ViewModels
 {
@@ -17,16 +17,16 @@ namespace turret_game.ViewModels
             Name = "Cannons"
         };
 
-        public List<SceneObjectViewModel> SceneObjects
+        public SceneObjectViewModel Fire { get; } = new SceneObjectViewModel
         {
-            get
-            {
-                return new List<SceneObjectViewModel> { Head, Cannons };
-            }
-        }
+            Model = ObjLoaderService.GetBox(-3, (float)0.2, (float)0.2, -2, 0, (float)0),
+            Name = "Cannons"
+        };
+
+        public List<SceneObjectViewModel> SceneObjects => new() { Head, Cannons, Fire };
 
         public double Axis1 { get => Head.RZ; set { Head.RZ = value; } }
-        public double Axis2 { get => Cannons.RY; set { Cannons.RY = value; } }
+        public double Axis2 { get => Cannons.RX; set { Cannons.RX = value; } }
 
         public double TX { get => Head.TX; set { Head.TX = value; } }
         public double TY { get => Head.TY; set { Head.TY = value; } }
@@ -34,24 +34,20 @@ namespace turret_game.ViewModels
 
         // Gameplay
         public double Range { get; set; } = 50.0;
-        public double FireRate { get; set; } = 1.0; // tirs par seconde
+        public double FireRate { get; set; } = 2.0; // tirs par seconde
         public double Damage { get; set; } = 50.0;
 
         private double _cooldown = 0.0;
+        private int _fireToken = 0;
 
         public Cannon()
         {
             Cannons.LinkToParent(Head);
-            Cannons.OffTX = 0;
-            Cannons.OffTY = 0;
-            Cannons.OffTZ = 0;
-            Cannons.OffRX = 0;
-            Cannons.OffRY = 0;
-            Cannons.OffRZ = 0;
+            Fire.LinkToParent(Cannons);
 
-            // selon l'orientation de ton modèle, ajuste cet offset si la tête pointe à l'opposé
-            //Head.OffRZ = 0;
-            //Head.OffTZ = 1.5;
+            // si nécessaire, ajuste Head.OffRZ ou Head.OffTZ pour aligner le mesh
+            Head.OffTZ = 0.0;
+            Fire.IsVisible = false;
         }
 
         private static double RadToDeg(double rad) => rad * (180.0 / Math.PI);
@@ -95,7 +91,7 @@ namespace turret_game.ViewModels
             var alive = enemies?.Where(e => !e.IsDead).ToList() ?? new List<Enemy>();
             if (!alive.Any()) return;
 
-            Enemy target = null;
+            Enemy? target = null;
             double bestDistSq = double.MaxValue;
             foreach (var e in alive)
             {
@@ -118,8 +114,33 @@ namespace turret_game.ViewModels
             // Tir automatique (instant hit)
             if (_cooldown <= 0)
             {
+                Fire.IsVisible = true;
                 target.Hit(Damage);
                 _cooldown = 1.0 / Math.Max(1e-4, FireRate);
+
+                // Incrémente un token atomiquement pour identifier ce tir.
+                var token = System.Threading.Interlocked.Increment(ref _fireToken);
+
+                // Tâche non bloquante : attend 200 ms puis cache Fire si le token est toujours le dernier.
+                _ = System.Threading.Tasks.Task.Run(async () =>
+                {
+                    await System.Threading.Tasks.Task.Delay(200);
+
+                    // Si un tir plus récent a eu lieu, ne pas cacher l'effet du tir récent.
+                    if (token != _fireToken) return;
+
+                    var app = System.Windows.Application.Current;
+                    if (app?.Dispatcher != null)
+                    {
+                        // Mettre à jour sur le thread UI
+                        app.Dispatcher.BeginInvoke(new System.Action(() => Fire.IsVisible = false));
+                    }
+                    else
+                    {
+                        // Fallback si pas d'Application disponible
+                        Fire.IsVisible = false;
+                    }
+                });
             }
         }
     }

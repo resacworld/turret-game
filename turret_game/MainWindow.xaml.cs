@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media.Media3D;
 using Microsoft.Win32;
 using turret_game.ViewModels;
+using System.Diagnostics;
 
 namespace turret_game
 {
@@ -100,10 +101,10 @@ namespace turret_game
         private void AddVisualFor(SceneObjectViewModel so)
         {
             if (so.Model == null) return;
-            var visual = new ModelVisual3D { Content = so.Model, Transform = so.GetTransform() };
+            var visual = new ModelVisual3D { Content = so.IsVisible ? so.Model : null, Transform = so.GetTransform() };
             _map[so] = visual;
             Viewport.Children.Add(visual);
-            // réagir aux changements de transform
+            // réagir aux changements de transform ou visibilité
             so.PropertyChanged += (s, e) => RefreshVisual(so);
         }
 
@@ -122,6 +123,8 @@ namespace turret_game
             {
                 // Met à jour la transform (recalcule parent si nécessaire)
                 visual.Transform = so.GetTransform();
+                // Affiche/masque le contenu
+                visual.Content = so.IsVisible ? so.Model : null;
             }
         }
     }

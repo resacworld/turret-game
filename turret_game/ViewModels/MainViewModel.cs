@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using turret_game.Services;
 using System.Windows.Input;
-using System.Diagnostics;
+using System.Windows.Threading;
 using turret_game.Objects;
+using turret_game.Services;
 
 namespace turret_game.ViewModels
 {
@@ -38,43 +38,80 @@ namespace turret_game.ViewModels
 
         public ICommand AddFromFileCommand { get; }
 
+        // game state
+        private readonly List<Enemy> _enemies = new();
+        private readonly DispatcherTimer _gameTimer;
+        private readonly Random _rnd = new();
+
         public MainViewModel()
         {
-            AddFromFileCommand = new RelayCommand(p =>
-            {
-                // Supporte un seul chemin (string) ou plusieurs (string[])
-                if (p is string path && !string.IsNullOrWhiteSpace(path))
-                {
-                    AddFile(path);
-                }
-                else if (p is string[] paths)
-                {
-                    foreach (var fp in paths)
-                        AddFile(fp);
-                }
-            });
+            // timer pour update simple (UI thread)
+            _gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _gameTimer.Tick += (s, e) => GameTick(_gameTimer.Interval.TotalSeconds);
         }
 
         public void Loaded()
         {
-            Point3D point = new Point3D(10, 10, 10);
-
+            // ajouter la tourelle à la scène
             AddObjectsToScene(Cannon.SceneObjects);
-            AddObjectToScene(new SceneObjectViewModel
-            {
-                Model = Rect,
-                Name = "rect"
-            });
 
-            Cannon.OrientTo(point);
+            // positionner la tourelle au centre (exemple)
+            Cannon.TX = 0;
+            Cannon.TY = 0;
+            Cannon.TZ = 1.0;
+
+            // créer ennemis autour du centre qui s'orientent vers le centre
+            SpawnEnemiesAroundCenter(count: 8, radius: 80.0, elevation: 2.0);
+
+            _gameTimer.Start();
         }
 
-        private void AddFile(string path)
+        private void SpawnEnemiesAroundCenter(int count, double radius, double elevation)
         {
-            var model = ObjLoaderService.Load(path);
-            var obj = new SceneObjectViewModel { Model = model, Name = System.IO.Path.GetFileNameWithoutExtension(path) };
-            AddObjectToScene(obj);
-            SelectedObject = obj;
+            for (int i = 0; i < count; i++)
+            {
+                // angle en radians réparti uniformément + petite variation aléatoire
+                double angle = 2.0 * Math.PI * i / count + (_rnd.NextDouble() * 0.15 - 0.075);
+                double x = Math.Cos(angle) * radius;
+                double y = Math.Sin(angle) * radius;
+                var start = new Point3D(x, y, elevation);
+
+                // cible : centre de la map (0,0, hauteur du canon)
+                var target = new Point3D(0, 0, Cannon.TZ);
+
+                var enemy = new Enemy(start, target, speed: 4.0 + _rnd.NextDouble() * 2.0, health: 100.0);
+                _enemies.Add(enemy);
+                AddObjectToScene(enemy.Body);
+
+                // orienter visuellement l'enemy vers le centre si besoin
+                var dx = target.Tx - start.Tx;
+                var dy = target.Ty - start.Ty;
+                var yawDeg = Math.Atan2(dy, dx) * 180.0 / Math.PI;
+                enemy.Body.RZ = yawDeg;
+            }
+        }
+
+        private void GameTick(double dt)
+        {
+            if (dt <= 0) return;
+
+            // update ennemis (avancent vers le centre)
+            foreach (var e in _enemies.ToList())
+            {
+                e.Update(dt);
+            }
+
+            // tourelle vise & tire automatiquement
+            Cannon.Update(dt, _enemies);
+
+            // retirer morts
+            var dead = _enemies.Where(x => x.IsDead).ToList();
+            foreach (var d in dead)
+            {
+                _enemies.Remove(d);
+                if (SceneObjects.Contains(d.Body))
+                    SceneObjects.Remove(d.Body);
+            }
         }
 
         private void AddObjectToScene(SceneObjectViewModel obj)

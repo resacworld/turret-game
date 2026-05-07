@@ -8,13 +8,16 @@ namespace turret_game.ViewModels
     {
         public string Name { get; set; } = "Object";
 
-        private double _tx, _ty, _tz = 0;
-        private double _rx, _ry, _rz = 0;
+        private double _tx, _ty, _tz;
+        private double _rx, _ry, _rz;
 
         // Offset applied when linked to a parent (relative pose)
-        private double _offTx, _offTy, _offTz = 0;
-        private double _offRx, _offRy, _offRz = 0;
-        
+        private double _offTx, _offTy, _offTz;
+        private double _offRx, _offRy, _offRz;
+
+        private bool _isVisible = true;
+        public bool IsVisible { get => _isVisible; set { if (SetField(ref _isVisible, value)) NotifyTransformChanged(); } }
+
         public Model3D Model { get; set; }
 
         public SceneObjectViewModel? Parent { get; private set; }
@@ -109,6 +112,7 @@ namespace turret_game.ViewModels
             OnPropertyChanged(nameof(RX));
             OnPropertyChanged(nameof(RY));
             OnPropertyChanged(nameof(RZ));
+            OnPropertyChanged(nameof(IsVisible));
         }
 
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
