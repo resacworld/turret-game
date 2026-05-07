@@ -8,13 +8,13 @@ namespace turret_game.ViewModels
     {
         public string Name { get; set; } = "Object";
 
-        private double _tx, _ty, _tz;
-        private double _rx, _ry, _rz;
+        private double _tx, _ty, _tz = 0;
+        private double _rx, _ry, _rz = 0;
 
         // Offset applied when linked to a parent (relative pose)
-        private double _offTx, _offTy, _offTz;
-        private double _offRx, _offRy, _offRz;
-
+        private double _offTx, _offTy, _offTz = 0;
+        private double _offRx, _offRy, _offRz = 0;
+        
         public Model3D Model { get; set; }
 
         public SceneObjectViewModel? Parent { get; private set; }

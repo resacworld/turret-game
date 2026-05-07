@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using turret_game.Services;
 using System.Windows.Input;
 using System.Diagnostics;
+using turret_game.Objects;
 
 namespace turret_game.ViewModels
 {
@@ -33,6 +34,7 @@ namespace turret_game.ViewModels
         }
 
         public Cannon Cannon { get; } = new Cannon();
+        public System.Windows.Media.Media3D.Model3D Rect { get; } = ObjLoaderService.GetBox(1, 1, 10, 10, 10, 5);
 
         public ICommand AddFromFileCommand { get; }
 
@@ -55,7 +57,16 @@ namespace turret_game.ViewModels
 
         public void Loaded()
         {
+            Point3D point = new Point3D(10, 10, 10);
+
             AddObjectsToScene(Cannon.SceneObjects);
+            AddObjectToScene(new SceneObjectViewModel
+            {
+                Model = Rect,
+                Name = "rect"
+            });
+
+            Cannon.OrientTo(point);
         }
 
         private void AddFile(string path)
