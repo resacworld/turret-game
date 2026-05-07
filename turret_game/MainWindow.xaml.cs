@@ -25,6 +25,13 @@ namespace turret_game
             BtnSetChild.Click += BtnSetChild_Click;
 
             _vm.SceneObjects.CollectionChanged += SceneObjects_CollectionChanged;
+
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            _vm.Loaded();
         }
 
         private void BtnLoad_Click(object? sender, RoutedEventArgs e)

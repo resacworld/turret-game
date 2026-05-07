@@ -3,13 +3,12 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using turret_game.Services;
 using System.Windows.Input;
+using System.Diagnostics;
 
 namespace turret_game.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly ObjLoaderService _loader = new ObjLoaderService();
-
         public ObservableCollection<SceneObjectViewModel> SceneObjects { get; } = new();
 
         private SceneObjectViewModel? _selected;
@@ -33,6 +32,8 @@ namespace turret_game.ViewModels
             set { _selectedChild = value; OnPropertyChanged(); }
         }
 
+        public Cannon Cannon { get; } = new Cannon();
+
         public ICommand AddFromFileCommand { get; }
 
         public MainViewModel()
@@ -52,12 +53,32 @@ namespace turret_game.ViewModels
             });
         }
 
+        public void Loaded()
+        {
+            AddObjectsToScene(Cannon.SceneObjects);
+        }
+
         private void AddFile(string path)
         {
-            var model = _loader.Load(path);
+            var model = ObjLoaderService.Load(path);
             var obj = new SceneObjectViewModel { Model = model, Name = System.IO.Path.GetFileNameWithoutExtension(path) };
-            SceneObjects.Add(obj);
+            AddObjectToScene(obj);
             SelectedObject = obj;
+        }
+
+        private void AddObjectToScene(SceneObjectViewModel obj)
+        {
+            if (!SceneObjects.Contains(obj))
+                SceneObjects.Add(obj);
+        }
+
+        private void AddObjectsToScene(List<SceneObjectViewModel> objs)
+        {
+            foreach (var obj in objs)
+            {
+                if (!SceneObjects.Contains(obj))
+                    SceneObjects.Add(obj);
+            }
         }
 
         // Lier child à parent en utilisant des offsets (en degrés et unités) :

@@ -4,9 +4,9 @@ using System.Windows.Media.Media3D;
 
 namespace turret_game.Services
 {
-    public class ObjLoaderService
+    public static class ObjLoaderService
     {
-        public Model3D Load(string path)
+        public static Model3D Load(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("path");
             ModelImporter importer = new ModelImporter();

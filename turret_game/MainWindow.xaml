@@ -30,7 +30,7 @@
             <TextBlock Text="{Binding SelectedChild.Name, TargetNullValue=(aucun)}" Margin="0,0,0,8"/>
 
             <TextBlock Text="Transform selectionne (TX,TY,TZ en unites; RX,RY,RZ en degres)" TextWrapping="Wrap"/>
-            <StackPanel DataContext="{Binding SelectedObject}" Margin="0,8,0,0">
+            <StackPanel DataContext="{Binding Cannon}" Margin="0,8,0,0">
                 <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="TX"/><TextBox Width="80" Text="{Binding TX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
                 <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="TY"/><TextBox Width="80" Text="{Binding TY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
                 <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="TZ"/><TextBox Width="80" Text="{Binding TZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
@@ -39,10 +39,10 @@
                 <StackPanel Orientation="Horizontal"><TextBlock Width="30" Text="RZ"/><TextBox Width="80" Text="{Binding RZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
 
                 <!-- Sliders pour déplacer l'objet sélectionné -->
-                <TextBlock Text="Déplacer (slider) - RX" Margin="0,8,0,2"/>
-                <Slider Minimum="-200" Maximum="200" Value="{Binding RX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="Déplacer (slider) - RY" Margin="0,8,0,2"/>
-                <Slider Minimum="-200" Maximum="200" Value="{Binding RY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Déplacer (slider) - Axis1" Margin="0,8,0,2"/>
+                <Slider Minimum="-200" Maximum="200" Value="{Binding Axis1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Déplacer (slider) - Axis2" Margin="0,8,0,2"/>
+                <Slider Minimum="-200" Maximum="200" Value="{Binding Axis2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock Text="Déplacer (slider) - RZ" Margin="0,8,0,2"/>
                 <Slider Minimum="-200" Maximum="200" Value="{Binding RZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
