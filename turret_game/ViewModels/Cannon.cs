@@ -8,22 +8,6 @@ using turret_game.Services;
 
 namespace turret_game.ViewModels
 {
-    // Plan (pseudocode) :
-    // 1) Calculer l'angle actuel "continu" de la tête pendant une transition (éviter de se baser
-    //    uniquement sur Head.RZ normalisé) pour éviter des sauts lors d'un nouvel objectif.
-    // 2) Lorsqu'on démarre une nouvelle orientation (OrientTo), définir _startRZ à l'angle continu
-    //    actuel, calculer le delta angulaire le plus court via NormalizeAngleDeg, et appliquer
-    //    _targetRZ = _startRZ + delta (target en espace continu). Faire de même pour RY (pitch).
-    // 3) Interpoler linéairement entre _start et _target en espace continu pendant Update.
-    //    Ne normaliser que pour l'affichage Head.RZ = NormalizeAngleDeg(...).
-    // 4) Quand la transition est terminée, réinitialiser _start/_target en valeurs normalisées
-    //    pour maintenir la cohérence pour les futures orientations.
-    // 5) Conserver la logique de tir et visibilité, mais s'assurer que IsOrientedToTarget compare
-    //    correctement en utilisant NormalizeAngleDeg sur la cible continue.
-    //
-    // Ces changements évitent les "saccades" provoquées par le wrapping angulaire et par des
-    // réinitialisations brutales des angles de départ/arrivée lors de transitions successives.
-
     public class Cannon : INotifyPropertyChanged
     {
         public SceneObjectViewModel Head { get; } = new SceneObjectViewModel
@@ -46,8 +30,21 @@ namespace turret_game.ViewModels
 
         public List<SceneObjectViewModel> SceneObjects => new() { Head, Cannons, Fire };
 
-        public double Axis1 { get => Head.RZ; set { Head.RZ = value; OnPropertyChanged(nameof(Axis1)); } }
-        public double Axis2 { get => Cannons.RY; set { Cannons.RY = value; OnPropertyChanged(nameof(Axis2)); } }
+        public double Axis1 { 
+            get => Head.RZ; 
+            set { 
+                Head.RZ = value; 
+                OnPropertyChanged(nameof(Axis1));
+                
+            } 
+        }
+        public double Axis2 { 
+            get => Cannons.RY; 
+            set { 
+                Cannons.RY = value; 
+                OnPropertyChanged(nameof(Axis2)); 
+            } 
+        }
 
         public double TX { get => Head.TX; set { Head.TX = value; } }
         public double TY { get => Head.TY; set { Head.TY = value; } }

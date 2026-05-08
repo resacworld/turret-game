@@ -48,7 +48,7 @@
             </StackPanel>
         </StackPanel>
 
-        <helix:HelixViewport3D x:Name="Viewport" Grid.Column="1" Background="LightGray" ShowCoordinateSystem="True" ZoomExtentsWhenLoaded="True">
+        <helix:HelixViewport3D x:Name="Viewport" Grid.Column="1" Background="LightGray" ShowCoordinateSystem="True" ZoomExtentsWhenLoaded="True" ShowFrameRate="True" ShowTriangleCountInfo="True">
             <helix:DefaultLights/>
         </helix:HelixViewport3D>
     </Grid>

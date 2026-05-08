@@ -49,6 +49,20 @@ namespace turret_game.ViewModels
             // timer pour update simple (UI thread)
             _gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(5) };
             _gameTimer.Tick += (s, e) => GameTick(_gameTimer.Interval.TotalSeconds);
+
+            Cannon.PropertyChanged += Cannon_PropertyChanged;
+        }
+
+        private void Cannon_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            foreach(var enemy in _enemies)
+            {
+                if (!enemy.IsDead)
+                {
+                    // mettre à jour la cible de chaque ennemi vers la nouvelle position du canon
+                    enemy.SetTarget(new Point3D(Cannon.TX, Cannon.TY, Cannon.TZ));
+                }
+            }
         }
 
         public void Loaded()
